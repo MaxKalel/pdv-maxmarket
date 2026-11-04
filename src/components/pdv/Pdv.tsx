@@ -66,15 +66,15 @@ export function Pdv() {
     setCodigo(""); focar();
   };
 
-  const f2 = () => {
-    if (!caixa) return avisar("Caixa fechado. Pressione F4 para abrir.");
-    if (!itens.length) return avisar("Carrinho vazio. Adicione produtos antes de finalizar.");
+  const f2 = (): void => {
+    if (!caixa) { avisar("Caixa fechado. Pressione F4 para abrir."); return; }
+    if (!itens.length) { avisar("Carrinho vazio. Adicione produtos antes de finalizar."); return; }
     const falta = repo.conferirEstoqueItens(itens);
-    if (falta) return avisar(`Estoque insuficiente para ${falta.item.nome}. Disponível: ${falta.disponivel} unidades.`);
+    if (falta) { avisar(`Estoque insuficiente para ${falta.item.nome}. Disponível: ${falta.disponivel} unidades.`); return; }
     setModal({ tipo: "pagamento" });
   };
-  const f3 = () => {
-    if (!itens.length || sel < 0) return avisar("Nenhum item selecionado para cancelar.");
+  const f3 = (): void => {
+    if (!itens.length || sel < 0) { avisar("Nenhum item selecionado para cancelar."); return; }
     setModal({ tipo: "cancelar" });
   };
   const f4 = () => setModal(caixa ? { tipo: "menuCaixa" } : { tipo: "abrirCaixa" });
@@ -85,7 +85,7 @@ export function Pdv() {
       if (!["F1", "F2", "F3", "F4"].includes(e.key)) return;
       e.preventDefault();
       if (modal) return;
-      ({ F1: () => setModal({ tipo: "consulta" }), F2: f2, F3: f3, F4: f4 } as Record<string, () => void>)[e.key]();
+      ({ F1: () => setModal({ tipo: "consulta" }), F2: f2, F3: f3, F4: f4 } as Record<string, () => void>)[e.key]?.();
     };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
@@ -99,6 +99,7 @@ export function Pdv() {
 
   const confirmarCancelamento = () => {
     const item = itens[sel];
+    if (!item) return;
     repo.registrarCancelamento(caixa!.id, item);
     const novo = itens.filter((_, i) => i !== sel);
     setItens(novo); setSel(novo.length ? Math.max(0, sel - 1) : -1);
@@ -422,8 +423,8 @@ function MovimentacaoJanela({ tipo, gaveta, onFechar, onConfirmar }: { tipo: "en
           if (e.key !== "Enter") return; e.preventDefault();
           const v = lerValor(t);
           const erro = validarMovimentacao(tipo, v, gaveta);
-          if (erro) return avisar(erro);
-          if (!motivo.trim()) return avisar("Informe o motivo.");
+          if (erro) { avisar(erro); return; }
+          if (!motivo.trim()) { avisar("Informe o motivo."); return; }
           onConfirmar(v!, motivo.trim());
         }} />
       <p className="mt-3 text-muted-foreground">Enter avança / confirma</p>
@@ -460,7 +461,7 @@ function FechamentoJanela({ caixa, onFechar, onConfirmar }: { caixa: Caixa; onFe
             onKeyDown={(e) => {
               if (e.key !== "Enter") return; e.preventDefault();
               const v = lerValor(t === "" ? "x" : t);
-              if (v === null || v < 0) return avisar("Valor inválido.");
+              if (v === null || v < 0) { avisar("Valor inválido."); return; }
               setContado(v);
             }} />
           <p className="mt-3 text-muted-foreground">Enter confirma</p>

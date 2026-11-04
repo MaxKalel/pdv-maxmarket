@@ -10,7 +10,8 @@ export function interpretarEntrada(
   const partes = t.split("*");
   if (partes.length > 2) return { ok: false, erro: "Formato inválido. Use quantidade*código." };
   if (partes.length === 2) {
-    const [q, c] = partes.map((p) => p.trim());
+    const q = (partes[0] ?? "").trim();
+    const c = (partes[1] ?? "").trim();
     if (!/^\d+$/.test(q) || Number(q) <= 0) return { ok: false, erro: "Quantidade inválida." };
     if (!c) return { ok: false, erro: "Informe o código após o *." };
     return { ok: true, quantidade: Number(q), codigo: c };
@@ -36,9 +37,10 @@ export function adicionarAoCarrinho(
 ): { itens: ItemVenda[]; indice: number } {
   const idx = itens.findIndex((i) => i.produtoId === produto.id);
   if (idx >= 0) {
-    const novaQtd = itens[idx].quantidade + quantidade;
+    const atual = itens[idx]!;
+    const novaQtd = atual.quantidade + quantidade;
     const novo = [...itens];
-    novo[idx] = { ...novo[idx], quantidade: novaQtd, subtotal: calcularSubtotal(novaQtd, novo[idx].precoUnitario) };
+    novo[idx] = { ...atual, quantidade: novaQtd, subtotal: calcularSubtotal(novaQtd, atual.precoUnitario) };
     return { itens: novo, indice: idx };
   }
   const item: ItemVenda = {
